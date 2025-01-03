@@ -141,6 +141,7 @@ static const unsigned char datapoints[483] = {
 static unsigned char items[483];
 
 //VARIABILI
+static unsigned char korj, keyprem; //gestione joystick e tastiera
 static unsigned char stageNo;
 static unsigned char ghostInStage; //valori da 0 a 4
 static unsigned char BlinkyShowing, InkyShowing, PinkyShowing, ClydeShowing;//1 se visibile, 0 se nascosto.
@@ -205,7 +206,9 @@ static unsigned char udgs[] = {
 
 /********************* funzioni ***********************************************/
 //lettura dell'input da tastiera
-static void readInput();
+static void readInputKey();
+//lettura dell'input da joystick
+static void readInputJoy() ;
 //la seguente procedura verifica se pacman impatta con un fantasma in tutti i possibili casi
 static void checkCatch();
 //questa funzione calcola lo spostamento proposto di un fantasma verso casa
@@ -242,8 +245,16 @@ int main()
   
   in_GetKeyReset();
   maxscore = 0;
+  korj     = 0;
   while (1){
-    splashScreen();
+    // splashScreen();
+    keyprem  = 'K';
+	while ((keyprem=='J') || (keyprem=='K')){
+		if (keyprem=='J')        korj     = 1;
+		else if (keyprem=='K')   korj     = 0;
+		splashScreen();
+	}
+
     newgame();
   }
   return 0;
@@ -253,7 +264,7 @@ static void splashScreen()
 {
   clrscr();
   gotoxy(0,0);
-  printf("GLDM GAMEZ presents:");//PRINT AT 0,0; ink 5;"GLDM GAMEZ presenta"
+  printf("GLDM GAMES presents:");//PRINT AT 0,0; ink 5;"GLDM GAMEZ presenta"
   printCharacterAt(pacmanDx,3,3);
   printCharacterAt(pacmanDx,5,3);
   printCharacterAt(pacmanDx,7,3);
@@ -265,22 +276,52 @@ static void splashScreen()
   
   gotoxy(6,6);
   printf("HIGH SCORE: %d",maxscore);
-  gotoxy(7,10);
-  printf("HOW TO PLAY:");
-  gotoxy(9,11);
-  printf("P = right");
-  gotoxy(9,12);
-  printf("O = left");
-  gotoxy(9,13);
-  printf("Q = up");
-  gotoxy(9,14);
-  printf("A = down");
   gotoxy(3,18);
-  printf("press any key to start...");
-      
-  in_WaitForNoKey();
-  in_WaitForKey();
-  in_WaitForNoKey();  
+  printf("press K or J to select input"); 
+  
+  gotoxy(7,10);
+  if (korj==1){ //JOYSTICK SELECTED
+	  printf("HOW TO PLAY:");
+	  gotoxy(9,12);
+	  printf("Move the joystick,");
+	  gotoxy(9,13);
+	  printf("run for your life!");
+	  gotoxy(3,16);	  
+	  printf("Selected input: JOYSTICK");  
+      gotoxy(5,19);
+	  printf("press FIRE to start.");
+	  unsigned char y =0;
+	  while (y==0) {
+		unsigned char r = inp(0x01);
+		if (r==32) {
+			y=1;
+			keyprem='X';
+		}
+		else {
+			keyprem = toupper(getk());
+			if (keyprem=='K') y=1;
+		}
+	  }
+  }
+  else { //KEYBOARD SELECTED  
+	  printf("HOW TO PLAY:");
+	  gotoxy(9,11);
+	  printf("P = right");
+	  gotoxy(9,12);
+	  printf("O = left");
+	  gotoxy(9,13);
+	  printf("Q = up");
+	  gotoxy(9,14);
+	  printf("A = down");
+	  gotoxy(3,16);
+	  printf("Selected input: KEYBOARD");  //
+	  gotoxy(3,19);
+	  printf("press any other key to start."); 
+	  in_WaitForNoKey();
+	  in_WaitForKey();
+      keyprem=toupper(getk());
+	  in_WaitForNoKey(); 
+  } 
 }
 
 static void newgame()
@@ -308,7 +349,7 @@ static void newgame()
   if (score>maxscore) maxscore=score;
 }
 
-static void readInput()
+static void readInputKey()
 {
   switch (toupper(getk())) { 
     case K_DOWN:
@@ -328,6 +369,34 @@ static void readInput()
       pmVertIn  = 0;
       break;
   }
+}
+
+
+//lettura dell'input da JOYSTICK
+static void readInputJoy() {
+	unsigned char r = inp(0x01);
+	switch (r){
+		case 1: //UP
+			pmHorizIn = 0;
+			pmVertIn  = -1;
+			break;
+		case 2: //DOWN
+			pmHorizIn = 0;
+			pmVertIn  = 1;
+			break;
+		case 4: //RIGHT
+			pmHorizIn = 1;
+			pmVertIn  = 0;
+			break;
+		case 8: //LEFT
+			pmHorizIn = -1;
+			pmVertIn  = 0;
+			break;
+		default:
+			pmHorizIn = 0;
+			pmVertIn  = 0;
+			break;
+	}
 }
 
 static void newstage()
@@ -540,7 +609,11 @@ static void blinkStageCleared(){
 static void drawloop()
 {
   while((itemsRemaining>0)&&(lives>0))  {
-    readInput();
+    if (korj==1) {
+		readInputJoy();}
+	else {
+		readInputKey();
+	}
 
     //ricalcolo posizione pacman
     //if((pmHorizIn==0) && (pmVertIn==0)){
@@ -980,7 +1053,11 @@ static void drawloop()
     pmc2 = pmc;
 
     //secondo giro di lettura input
-    readInput();
+    if (korj==1) {
+		readInputJoy();}
+	else {
+		readInputKey();
+	}
     //''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     //aggiungo i fantasmi se devo
     if ((counterFantasma==0)&&(ghostInStage<4)) {
