@@ -208,7 +208,7 @@ static unsigned char udgs[] = {
 //lettura dell'input da tastiera
 static void readInputKey();
 //lettura dell'input da joystick
-static void readInputJoy() ;
+static void readInputJoy();
 //la seguente procedura verifica se pacman impatta con un fantasma in tutti i possibili casi
 static void checkCatch();
 //questa funzione calcola lo spostamento proposto di un fantasma verso casa
@@ -349,6 +349,7 @@ static void newgame()
   if (score>maxscore) maxscore=score;
 }
 
+//lettura dell'input da tastiera
 static void readInputKey()
 {
   switch (toupper(getk())) { 
@@ -370,7 +371,6 @@ static void readInputKey()
       break;
   }
 }
-
 
 //lettura dell'input da JOYSTICK
 static void readInputJoy() {
