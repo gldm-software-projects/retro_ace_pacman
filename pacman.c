@@ -1,15 +1,13 @@
 /*
  *      PACMAN for Jupiter Ace
- *
  *      coded by Gian Luca De Michelis
  * 
  * 
- * to build with boldfield joystick:
+ * to force build with boldfield joystick support:
  * #define USEJOYSTICK 1
  * to build withoud boldfield joystick support:
  * #undef USEJOYSTICK 
  */
-#undef USEJOYSTICK 
 
 #define CENTESIMO_DI_SECONDO 1
 #define QUARTO_DI_SECONDO 25
@@ -325,7 +323,7 @@ int main() {
     maxscore = 0;
     korj = 0;
     keyprem = K_KEYBOARD;
-    #ifdef USEJOYSTICK
+#ifdef USEJOYSTICK
     while (1) {
         // keyprem  = K_KEYBOARD;
         while ((keyprem == K_JOYSTICK) || (keyprem == K_KEYBOARD)) {
@@ -344,13 +342,13 @@ int main() {
         }
         csleep(UN_SECONDO);
     } 
-    #else
+#else
     while (1) {       
         splashScreen();
         newgame();
         csleep(UN_SECONDO);
     }
-    #endif
+#endif
     return 0;
 }
 
@@ -373,7 +371,7 @@ static void splashScreen() {
     gotoxy(7, 10);
     printf("HOW TO PLAY:");
 
-    #ifdef USEJOYSTICK
+#ifdef USEJOYSTICK
     gotoxy(3, 18);
     printf("press K or J to select input");
     
@@ -416,7 +414,7 @@ static void splashScreen() {
         keyprem = toupper(getk());
         in_WaitForNoKey();
     }
-    #else
+#else
     gotoxy(9, 11);
     printf("P = right");
     gotoxy(9, 12);
@@ -430,7 +428,7 @@ static void splashScreen() {
     in_WaitForNoKey();
     in_WaitForKey();
     in_WaitForNoKey();
-    #endif
+#endif
 }
 
 static void newgame() {
@@ -758,15 +756,15 @@ static void blinkStageCleared() {
 
 static void drawloop() {
     while ((itemsRemaining > 0) && (lives > 0)) {
-        #ifdef USEJOYSTICK
+#ifdef USEJOYSTICK
         if (korj == 1) {
             readInputJoy();
         } else {
             readInputKey();
         }
-        #else
+#else
         readInputKey();
-        #endif
+#endif
 
         // ricalcolo posizione pacman
         // if((pmHorizIn==0) && (pmVertIn==0)){
