@@ -2,8 +2,18 @@
  *      PACMAN for Jupiter Ace
  *
  *      coded by Gian Luca De Michelis
- *
+ * 
+ * 
+ * to build with boldfield joystick:
+ * #define USEJOYSTICK 1
+ * to build withoud boldfield joystick support:
+ * #undef USEJOYSTICK 
  */
+#undef USEJOYSTICK 
+
+#define CENTESIMO_DI_SECONDO 1
+#define QUARTO_DI_SECONDO 25
+#define UN_SECONDO 100
 
 #include <conio.h>
 #include <ctype.h>
@@ -19,6 +29,8 @@
 #define K_DOWN 'A'
 #define K_LEFT 'O'
 #define K_RIGHT 'P'
+#define K_JOYSTICK 'J'
+#define K_KEYBOARD 'K'
 
 // caratteri che rappresentano i muri
 #define h_all 141
@@ -267,8 +279,10 @@ static unsigned char udgs[] = {
 /********************* funzioni ***********************************************/
 // lettura dell'input da tastiera
 static void readInputKey();
+#ifdef USEJOYSTICK
 // lettura dell'input da joystick
 static void readInputJoy();
+#endif
 // la seguente procedura verifica se pacman impatta con un fantasma in tutti i
 // possibili casi
 static void checkCatch();
@@ -310,25 +324,33 @@ int main() {
     in_GetKeyReset();
     maxscore = 0;
     korj = 0;
-    keyprem = 'K';
+    keyprem = K_KEYBOARD;
+    #ifdef USEJOYSTICK
     while (1) {
-        // keyprem  = 'K';
-        while ((keyprem == 'J') || (keyprem == 'K')) {
-            if (keyprem == 'J')
+        // keyprem  = K_KEYBOARD;
+        while ((keyprem == K_JOYSTICK) || (keyprem == K_KEYBOARD)) {
+            if (keyprem == K_JOYSTICK)
                 korj = 1;
-            else if (keyprem == 'K')
+            else if (keyprem == K_KEYBOARD)
                 korj = 0;
             splashScreen();
         }
         newgame();
         // ripristino selezione controllo alla fine della partita
         if (korj == 1) {
-            keyprem = 'J';
+            keyprem = K_JOYSTICK;
         } else {
-            keyprem = 'K';
+            keyprem = K_KEYBOARD;
         }
-        csleep(100);
+        csleep(UN_SECONDO);
+    } 
+    #else
+    while (1) {       
+        splashScreen();
+        newgame();
+        csleep(UN_SECONDO);
     }
+    #endif
     return 0;
 }
 
@@ -347,12 +369,15 @@ static void splashScreen() {
 
     gotoxy(6, 6);
     printf("HIGH SCORE: %d", maxscore);
-    gotoxy(3, 18);
-    printf("press K or J to select input");
 
     gotoxy(7, 10);
-    if (korj == 1) { // JOYSTICK SELECTED
-        printf("HOW TO PLAY:");
+    printf("HOW TO PLAY:");
+
+    #ifdef USEJOYSTICK
+    gotoxy(3, 18);
+    printf("press K or J to select input");
+    
+    if (korj == 1) { // JOYSTICK SELECTED        
         gotoxy(9, 12);
         printf("Move the joystick,");
         gotoxy(9, 13);
@@ -369,12 +394,11 @@ static void splashScreen() {
                 keyprem = 'X';
             } else {
                 keyprem = toupper(getk());
-                if (keyprem == 'K')
+                if (keyprem == K_KEYBOARD)
                     y = 1;
             }
         }
     } else { // KEYBOARD SELECTED
-        printf("HOW TO PLAY:");
         gotoxy(9, 11);
         printf("P = right");
         gotoxy(9, 12);
@@ -384,7 +408,7 @@ static void splashScreen() {
         gotoxy(9, 14);
         printf("A = down");
         gotoxy(3, 16);
-        printf("Selected input: KEYBOARD"); //
+        printf("Selected input: KEYBOARD"); 
         gotoxy(3, 19);
         printf("press any other key to start.");
         in_WaitForNoKey();
@@ -392,6 +416,21 @@ static void splashScreen() {
         keyprem = toupper(getk());
         in_WaitForNoKey();
     }
+    #else
+    gotoxy(9, 11);
+    printf("P = right");
+    gotoxy(9, 12);
+    printf("O = left");
+    gotoxy(9, 13);
+    printf("Q = up");
+    gotoxy(9, 14);
+    printf("A = down");  
+    gotoxy(3, 19);
+    printf("press any key to start...");
+    in_WaitForNoKey();
+    in_WaitForKey();
+    in_WaitForNoKey();
+    #endif
 }
 
 static void newgame() {
@@ -414,7 +453,7 @@ static void newgame() {
         if (waiting > 4)
             waiting = waiting - 1;
         stageNo++;
-        csleep(100);
+        csleep(UN_SECONDO);
     }
     if (score > maxscore)
         maxscore = score;
@@ -442,6 +481,7 @@ static void readInputKey() {
     }
 }
 
+#ifdef USEJOYSTICK
 // lettura dell'input da JOYSTICK
 static void readInputJoy() {
     unsigned char r = inp(0x01);
@@ -512,6 +552,7 @@ static void readInputJoy() {
         break;
     }
 }
+#endif
 
 static void newstage() {
     drawboard();
@@ -616,17 +657,17 @@ static void blinkReady() {
     cputs("READY!");
 
     bit_beep(195, 466); // 115000/246.94); //B3  = 246.94 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(195, 233); // 115000/493.88); //B4  = 493.88 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(195, 311); // 115000/369.99); //F#4 = 369.99 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(195, 370); // 115000/311.13); //D#4 = 311.13 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(98, 233); // 115000/493.88); //B4  = 493.88 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(293, 311); // 115000/369.99); //F#4 = 369.99 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(390, 370); // 115000/311.13); //D#4 = 311.13 Hz
     csleep(3);
 
@@ -634,59 +675,59 @@ static void blinkReady() {
     cputs("      ");
 
     bit_beep(195, 439); // 115000/261.63); // C4 = 261.63 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(195, 220); // 115000/523.25); // C5 = 523.25 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(195, 293); // 115000/392.00); // G4 = 392.00 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(195, 349); // 115000/329.63); // E4 = 329.63 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(98, 220); // 115000/523.25);  // C5 = 523.25 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(293, 293); // 115000/392.00);
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(390, 349); // 115000/329.63);
     csleep(3);
     gotoxy(9, 12);
     cputs("READY!");
 
     bit_beep(195, 466); // 115000/246.94); //B3  = 246.94 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(195, 233); // 115000/493.88); //B4  = 493.88 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(195, 311); // 115000/369.99); //F#4 = 369.99 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(195, 370); // 115000/311.13); //D#4 = 311.13 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(98, 233); // 115000/493.88);  //B4  = 493.88 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(293, 311); // 115000/369.99); //F#4 = 369.99 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(390, 370); // 115000/311.13); //D#4 = 311.13 Hz
     csleep(3);
     gotoxy(9, 12);
     cputs("      ");
 
     bit_beep(98, 370); // 115000/311.13);  //311.13 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(98, 349); // 115000/329.63);  //329.63 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(195, 329); // 115000/349.23); // F4 = 349.23 Hz
     csleep(3);
 
     bit_beep(98, 329); // 115000/349.23); // 349.99 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(98, 311); // 115000/369.99); // 369.99 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(195, 293); // 115000/392.00); // 392.00 Hz
     csleep(3);
 
     bit_beep(98, 293); // 115000/392.00); // 392.00 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(98, 277); // 115000/415.30); // G#4 = 415.30 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(195, 261); // 115000/440.00); // A4 = 440 Hz
-    csleep(1);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(390, 233); // 115000/493.88); // 493.88 Hz
     // inizio piccola attesa
     csleep(3);
@@ -697,10 +738,10 @@ static void blinkGameOver() {
     for (unsigned char i = 0; i < 3; i++) {
         gotoxy(8, 12);
         cputs("GAME OVER");
-        csleep(25);
+        csleep(QUARTO_DI_SECONDO);
         gotoxy(8, 12);
         cputs("         ");
-        csleep(25);
+        csleep(QUARTO_DI_SECONDO);
     }
 }
 
@@ -708,20 +749,24 @@ static void blinkStageCleared() {
     for (unsigned char i = 0; i < 3; i++) {
         gotoxy(8, 12);
         cputs(" CLEARED!");
-        csleep(25);
+        csleep(QUARTO_DI_SECONDO);
         gotoxy(8, 12);
         cputs("         ");
-        csleep(25);
+        csleep(QUARTO_DI_SECONDO);
     }
 }
 
 static void drawloop() {
     while ((itemsRemaining > 0) && (lives > 0)) {
+        #ifdef USEJOYSTICK
         if (korj == 1) {
             readInputJoy();
         } else {
             readInputKey();
         }
+        #else
+        readInputKey();
+        #endif
 
         // ricalcolo posizione pacman
         // if((pmHorizIn==0) && (pmVertIn==0)){
@@ -1133,11 +1178,15 @@ static void drawloop() {
         pmc2 = pmc;
 
         // secondo giro di lettura input
+#ifdef USEJOYSTICK
         if (korj == 1) {
             readInputJoy();
         } else {
             readInputKey();
         }
+#else
+        readInputKey();
+#endif
         //''''''''''''''''''''''''''''''''''''''''''''''''''''''''
         // aggiungo i fantasmi se devo
         if ((counterFantasma == 0) && (ghostInStage < 4)) {
@@ -1723,21 +1772,19 @@ static void calculateGhostMovement(unsigned char row, unsigned char col) {
 static void pacManDies() {
     bit_beep(195, 311); // 115000/369.99);
     printCharacterAt(pacmanPieno, pmc, pmr + 1);
-    // csleep(20);
     bit_beep(195, 349); // 115000/329.63);
     printCharacterAt(pacmanSu, pmc, pmr + 1);
-    // csleep(20);
     bit_beep(195, 370); // 115000/311.13);
     printCharacterAt(pacmanMezzo, pmc, pmr + 1);
-    // csleep(20);
     bit_beep(195, 392); // 115000/293.66);
     printCharacterAt(pacmanPezzo, pmc, pmr + 1);
-    // csleep(20);
     bit_beep(195, 439); // 115000/261.63);
     printCharacterAt(SPC, pmc, pmr + 1);
-    csleep(2);
+    csleep(CENTESIMO_DI_SECONDO);
+    csleep(CENTESIMO_DI_SECONDO);
     bit_beep(260, 466); // 115000/246.94);
-    csleep(50);
+    csleep(QUARTO_DI_SECONDO);
+    csleep(QUARTO_DI_SECONDO);
 }
 
 static void drawRemainingLives() {
