@@ -13,7 +13,10 @@ this game is developed in C using Z88DK
 
 ## build notes
 
-Use the **build.cmd** script. It supposes that **zcc.exe** is reachable (i.e. its path is in the environment variable PATH).  
-The **build_wav.cmd** script generates a **.wav** file, useful if you want to load the game in a real Jupiter Ace or a Minstrel 4.
+Use the build scripts. The compiler **zcc.exe** must be reachable (i.e. its path should be in the environment variable PATH).  
+- The **build_no_joy.cmd** script generates **pacman_k.tap** and **pacman_k.wav** (without joystick support).
+- The **build_w_joy.cmd** script generates **pacman_j.tap** and **pacman_j.wav** (with joystick support).
+
+PS: the wav file is useful if you want to load the game in a real Jupiter Ace or a Minstrel 4.
 
 ---------------------------------------------------------------------
