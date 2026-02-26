@@ -9,7 +9,7 @@ this game is developed in C using Z88DK
 
 *please install the following applications:*
 + Compiler Z88DK : get a nightly build at http://nightly.z88dk.org/   
-+ EightyOne emulator: get it at https://www.jupiter-ace.co.uk/emulators_win.html  
++ an Emulator: (I am using EightyOne: get it at https://www.jupiter-ace.co.uk/emulators_win.html )
 
 ## build notes
 
